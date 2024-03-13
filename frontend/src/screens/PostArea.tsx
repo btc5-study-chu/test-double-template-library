@@ -1,23 +1,14 @@
-import {DefaultUserRepository, UserRepository} from "../repository/UserRepository.ts";
+import {userRepository} from "../repository/UserRepository.ts";
 import {useState} from "react";
 
-type Props  = {
-        userRepository?:UserRepository
-}
 
-
-export const PostArea = (
-    {
-        userRepository = new DefaultUserRepository()
-    }:Props
-    ) => {
+export const PostArea = () => {
     const [inputName, setInputName] = useState('')
     const [inputNickName, setInputNickName] = useState('')
     const [inputTerm, setInputTerm] = useState('')
     const [inputRemark, setInputRemark] = useState('')
 
     function sendInfo () {
-           if (userRepository === undefined) return
            userRepository.submit(
                {
                    name: inputName,
@@ -46,10 +37,3 @@ export const PostArea = (
     </>)
 }
 
-
-
-// 名前        input: string
-// ニックネーム input: string
-// FND        input: string …かな?
-// 一言        input: string
-// 投稿ボタン

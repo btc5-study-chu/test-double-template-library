@@ -1,10 +1,10 @@
-import {expect, test} from "vitest";
+import {expect, test, vi} from "vitest";
 import {PostArea} from "../../screens/PostArea.tsx";
 import {render, screen} from "@testing-library/react";
 import {userEvent} from "@testing-library/user-event";
 import {InputObject} from "../../type/TypeUserRepository.ts";
-import {SpyUserRepository} from "../repository/SpyUserRepository.ts";
 import {act} from "react-dom/test-utils";
+import {userRepository} from "../../repository/UserRepository.ts";
 
 describe("PostArea.tsxのテスト",() =>{
     test("PostArea.tsxをレンダリングすると全てのラベルがある",() => {
@@ -55,6 +55,7 @@ describe("PostArea.tsxのテスト",() =>{
     })
 
     test("投稿ボタンを押したらsubmitメソッドに各inputに入力された値を引数として渡す", async () => {
+        const spyUserRepository = vi.spyOn(userRepository,"submit")
         const dummyInputData: InputObject = {
             name: "tanaka",
             nickName:"tanachu",
@@ -62,9 +63,7 @@ describe("PostArea.tsxのテスト",() =>{
             remark: "nezumi"　　
         }
 
-        const spyUserRepository = new SpyUserRepository()
-
-        render(<PostArea userRepository={spyUserRepository}/>)
+        render(<PostArea />)
         const inputName = screen.getAllByRole('textbox')[0]
         const inputNickName = screen.getAllByRole('textbox')[1]
         const inputTerm = screen.getAllByRole('textbox')[2]
@@ -77,13 +76,12 @@ describe("PostArea.tsxのテスト",() =>{
         await userEvent.click(screen.getByRole('button',{name: '投稿'}))
 
 
-        expect(spyUserRepository.submit_argumetValue).toEqual(dummyInputData)
+        expect(spyUserRepository).toHaveBeenCalledWith(dummyInputData)
     })
 
     test('投稿ボタンが押されたらinputの中身が空になっている', async () => {
-        const spyUserRepository = new SpyUserRepository()
 
-        render(<PostArea userRepository={spyUserRepository}/>)
+        render(<PostArea />)
         const inputName = screen.getAllByRole('textbox')[0]
         const inputNickName = screen.getAllByRole('textbox')[1]
         const inputTerm = screen.getAllByRole('textbox')[2]
