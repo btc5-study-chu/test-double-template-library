@@ -1,23 +1,18 @@
-import {DefaultUserRepository, UserRepository} from "../repository/UserRepository.ts";
 import {useEffect, useState} from "react";
 import {GetUser} from "../type/TypeUserRepository.ts";
+import {userRepository} from "../repository/UserRepository.ts";
 
-type  Props = {
-    userRepository?:UserRepository
-}
-export const InfoArea = (
-    {
-                             userRepository = new DefaultUserRepository()
-}:Props) => {
+export const InfoArea = () => {
     const [users, setUsers] = useState<GetUser[]>([])
+
     useEffect(() => {
         const getAllUser = async() => {
-            const usersData = await userRepository?.getUsers()
-            console.log(usersData)
+            const usersData = await userRepository.getUsers()
            setUsers(usersData)
         }
         getAllUser()
     }, []);
+
     return (
         <>
             <div>データ数 :</div>

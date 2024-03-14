@@ -60,10 +60,11 @@ describe("PostArea.tsxのテスト",() =>{
             name: "tanaka",
             nickName:"tanachu",
             term: '12',
-            remark: "nezumi"　　
+            remark: "nezumi"
         }
 
         render(<PostArea />)
+
         const inputName = screen.getAllByRole('textbox')[0]
         const inputNickName = screen.getAllByRole('textbox')[1]
         const inputTerm = screen.getAllByRole('textbox')[2]
@@ -100,5 +101,4 @@ describe("PostArea.tsxのテスト",() =>{
         expect(screen.getAllByRole('textbox')[2]).toHaveValue('')
         expect(screen.getAllByRole('textbox')[3]).toHaveValue('')
     })
-
 })

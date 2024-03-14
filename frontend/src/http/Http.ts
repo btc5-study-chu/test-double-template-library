@@ -1,12 +1,12 @@
 import {GetUser, InputObject} from "../type/TypeUserRepository.ts";
 import axios from "axios";
 
-export interface Http {
+interface Http {
     submitHttp(inputObject:InputObject):Promise<void>
     getUsersHttp():Promise<GetUser[]>
 }
 
-export class DefaultHttp implements Http {
+class DefaultHttp implements Http {
     async submitHttp(inputObject: InputObject) {
         await axios.post("/api/v1/users",inputObject)
     }
@@ -14,3 +14,5 @@ export class DefaultHttp implements Http {
         return axios.get("/api/v1/users").then(elm => elm.data)
     }
 }
+
+export const userHttp = new DefaultHttp()
