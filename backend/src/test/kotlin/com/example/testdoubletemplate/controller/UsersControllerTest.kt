@@ -3,6 +3,8 @@ package com.example.testdoubletemplate.controller
 import com.example.testdoubletemplate.model.Users
 import com.example.testdoubletemplate.service.SpyUsersService
 import com.example.testdoubletemplate.service.StubUsersService
+import com.example.testdoubletemplate.service.UsersService
+import io.mockk.mockk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.MockMvc
@@ -11,21 +13,34 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.util.UUID
 
+@SpringBootTest
+@AutoConfigureMockMvc
 class UsersControllerTest{
 
-    private lateinit var spyUsersService : SpyUsersService
-    private lateinit var stubUsersService : StubUsersService
+//    @InjectMocks
+    private lateinit var controller: UsersController
+
+    @Autowired
     private lateinit var mockMvc: MockMvc
+
+    @Mock
+    private lateinit var service : UsersService
 
     @BeforeEach
     fun setUp () {
-        spyUsersService = SpyUsersService()
-        stubUsersService = StubUsersService()
+        service = mockk()
+        controller = UsersController(service)
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build()
     }
 
 
