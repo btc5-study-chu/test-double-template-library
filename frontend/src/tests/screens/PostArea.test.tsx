@@ -6,6 +6,7 @@ import {InputObject} from "../../type/TypeUserRepository.ts";
 import {act} from "react-dom/test-utils";
 import {userRepository} from "../../repository/UserRepository.ts";
 
+vi.mock('axios')
 describe("PostArea.tsxのテスト",() =>{
     test("PostArea.tsxをレンダリングすると全てのラベルがある",() => {
 

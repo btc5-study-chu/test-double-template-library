@@ -1,10 +1,18 @@
-import {expect} from "vitest";
-import {SpyHttp} from "../http/SpyHttp.ts";
+import {expect, vi} from "vitest";
 import {InputObjectBuilder} from "../__test-helper__/InputObjectBuilder.ts";
-import {StubHttp} from "../http/StubHttp.ts";
+import {http} from "../../http/Http.ts";
+import {userRepository} from "../../repository/UserRepository.ts";
 
+
+vi.mock('axios')
+vi.mock("../../http/Http.ts")
 describe('UserRepositoryのテスト',() => {
+    afterEach(()=>{
+        vi.restoreAllMocks()
+    })
+
     test('UserRepositoryのsubmitメソッドは、正しい引数でHttpのsubmitHttpsを呼ぶ',() => {
+        const spyHttpSubmit = vi.spyOn(http, "submitHttp")
         const testArg = new InputObjectBuilder()
             .setName('tanaka')
             .setNickname('tanachu')
@@ -12,30 +20,22 @@ describe('UserRepositoryのテスト',() => {
             .setRemark('nezumi')
             .build()
 
-        const spyHttp = new SpyHttp()
-        const userRepository = new DefaultUserRepository(spyHttp)
-
-
         userRepository.submit(testArg)
 
-        expect(spyHttp.submitHttp_argument).toEqual(testArg)
+        expect(spyHttpSubmit).toHaveBeenCalledWith(testArg)
     })
 
-    test('UserRepositoryのgetUsersメソッドは、HttpのgetUsersHttpを呼ぶ',() => {
-        const spyHttp = new SpyHttp()
-        const userRepository = new DefaultUserRepository(spyHttp)
+    test('UserRepositoryのgetUsersメソッドは、HttpのgetUsersHttpを呼ぶ',async () => {
+        const spyHttpGetUser = vi.spyOn(http, "getUsersHttp")
 
+        await userRepository.getUsers()
 
-        userRepository.getUsers()
-
-        expect(spyHttp.getUsersHttp_wasCalled).toBe(true)
+        expect(spyHttpGetUser).toHaveBeenCalled()
     })
 
     test('UserRepositoryのgetUsersメソッドは、HttpのgetUsersHttpから受け取った値を返す',async () => {
 
-        const stubHttp = new StubHttp()
-        const userRepository = new DefaultUserRepository(stubHttp)
-        stubHttp.getUsersHttp_returnValue = [{
+        const stubAxiosRes = [{
             id: '123456789',
             name: 'tanaka',
             nickName: 'tanachu',
@@ -48,6 +48,7 @@ describe('UserRepositoryのテスト',() => {
             term: '12',
             remark: 'akarui'
         }]
+        vi.spyOn(http,"getUsersHttp").mockResolvedValue(stubAxiosRes)
 
 
         const res = await userRepository.getUsers()

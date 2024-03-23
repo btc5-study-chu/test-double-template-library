@@ -1,4 +1,5 @@
 import {GetUser, InputObject} from "../type/TypeUserRepository.ts";
+import {http} from "../http/Http.ts";
 
 
 class UserRepository {
@@ -7,13 +8,11 @@ class UserRepository {
     //     this.http = http
     // }
     submit(inputObject: InputObject) {
-        console.log(inputObject)
-        // this.http.submitHttp(inputObject)
+        http.submitHttp(inputObject)
     }
 
     async getUsers(): Promise<GetUser[]> {
-        // return Promise.resolve(this.http.getUsersHttp())
-        return Promise.resolve([])
+        return Promise.resolve(http.getUsersHttp())
     }
 }
 

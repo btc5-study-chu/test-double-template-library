@@ -4,8 +4,15 @@ import {describe, vi} from "vitest";
 import {userRepository} from "../../repository/UserRepository.ts";
 import {act} from "react-dom/test-utils";
 
-
+vi.mock('axios')
+vi.mock("../../http/Http.ts")
 describe('InfoArea.tsxのテスト',()=>{
+    beforeEach(()=>{
+        vi.spyOn(userRepository, "getUsers").mockResolvedValue([
+            {id: "0000-001", name:"tanaka", nickName:"tanachu", term:"12",remark:"nezumi"},
+            {id: "0000-002", name:"tanaka2", nickName:"tanachu2", term:"122",remark:"nezumi2"},
+        ])
+    })
     describe('InfoAreaがレンダリングされた時,', () => {
         test('データ数というテキストがあること',async ()=>{
             await act(async () => {
@@ -39,16 +46,12 @@ describe('InfoArea.tsxのテスト',()=>{
         })
 
         test('UserRepositoryのgetUsersから受け取った返り値をテーブルに表示して且つ、受け取った要素の数が表示できる',async () => {
-            vi.spyOn(userRepository, "getUsers").mockResolvedValue([
-                {id: "0000-001", name:"tanaka", nickName:"tanachu", term:"12",remark:"nezumi"},
-                {id: "0000-002", name:"tanaka2", nickName:"tanachu2", term:"122",remark:"nezumi2"},
-            ])
 
             await act(async () => {
                 render(<InfoArea />)
             })
 
-            expect(screen.getByText("0000-001")).toBeInTheDocument()
+            expect(await screen.findByText("0000-001")).toBeInTheDocument()
             expect(screen.getByText("tanaka")).toBeInTheDocument()
             expect(screen.getByText("tanachu")).toBeInTheDocument()
             expect(screen.getByText("12")).toBeInTheDocument()

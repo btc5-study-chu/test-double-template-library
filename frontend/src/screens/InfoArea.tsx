@@ -4,7 +4,6 @@ import {userRepository} from "../repository/UserRepository.ts";
 
 export const InfoArea = () => {
     const [users, setUsers] = useState<GetUser[]>([])
-
     useEffect(() => {
         const getAllUser = async() => {
             const usersData = await userRepository.getUsers()
