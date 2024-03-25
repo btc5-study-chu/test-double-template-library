@@ -2,16 +2,27 @@ package com.example.testdoubletemplate.service
 
 import com.example.testdoubletemplate.model.Users
 import com.example.testdoubletemplate.model.UsersRecord
-import com.example.testdoubletemplate.repository.SpyUsersRepository
-import com.example.testdoubletemplate.repository.StubUsersRepository
-import org.junit.jupiter.api.Assertions.*
+import com.example.testdoubletemplate.repository.UsersRepository
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
 class UsersServiceTest{
-    private  val spyUsersRepository = SpyUsersRepository()
-    private  val stubUsersRepository = StubUsersRepository()
+
+    private lateinit var repository: UsersRepository
+
+    private lateinit var service: UsersService
+
+    @BeforeEach
+    fun setUp(){
+        repository = mockk()
+        service = UsersServiceImpl(repository)
+    }
 
 
     @Nested
@@ -19,41 +30,44 @@ class UsersServiceTest{
       @Test
           fun サービスのgetUserServiceがRepositoryのfindAllを呼んでいること(){
               //given
-              val usersService = UsersServiceImpl(spyUsersRepository)
+              every { repository.findAll() } returns emptyList()
               //when
-              usersService.getUsersService()
+              service.getUsersService()
 
               //then
-              assertEquals(true,spyUsersRepository.findAll_isCalled)
+              verify { repository.findAll()  }
           }
 
           @Test
           fun サービスのgetUserServiceは正しい返り値を返す(){
               //given
-              val usersService = UsersServiceImpl(stubUsersRepository)
-              val dummyId = UUID.fromString("00000000-0000-0000-0000-000000000002")
-              val expected = Users (
-                  id = dummyId,
-                  name = "tanakka",
-                  nickName = "tanachu",
-                  term = 12,
-                  remark = "nezumi"
-              )
-
-              stubUsersRepository.findAll_result = mutableListOf(
+              val dummyId1 = UUID.fromString("00000000-0000-0000-0000-000000000001")
+              val dummyId2 = UUID.fromString("00000000-0000-0000-0000-000000000002")
+              val dummyUser1 = Users(id=dummyId1,name="tanaka", nickName = "tanachu", term = 12, remark = "nezumi")
+              val dummyUser2 = Users(id=dummyId2,name="tanaka2", nickName = "tanachu2", term = 122, remark = "nezumi2")
+              every { repository.findAll() } returns mutableListOf(
                   UsersRecord(
-                      id = expected.id,
-                      name = expected.name,
-                      nickName = expected.nickName,
-                      term = expected.term,
-                      remark = expected.remark
+                      id = dummyUser1.id,
+                      name = dummyUser1.name,
+                      nickName = dummyUser1.nickName,
+                      term = dummyUser1.term,
+                      remark = dummyUser1.remark
+                  ),
+                  UsersRecord(
+                      id = dummyUser2.id,
+                      name = dummyUser2.name,
+                      nickName = dummyUser2.nickName,
+                      term = dummyUser2.term,
+                      remark = dummyUser2.remark
                   )
               )
+
               //when
-              val res = usersService.getUsersService()
+              val res = service.getUsersService()
 
               //then
-              assertEquals(expected,res[0])
+              assertEquals(dummyUser1,res[0])
+              assertEquals(dummyUser2,res[1])
           }
     }
 
@@ -62,7 +76,7 @@ class UsersServiceTest{
         @Test
         fun RepositoryのSaveメソッドを正しい引数で呼んでいるか(){
             //given
-            val usersService = UsersServiceImpl(spyUsersRepository)
+            every { repository.save(any()) } returns UsersRecord()
             val tempArg = Users(
                 name = "tanaka",
                 nickName = "tanachu",
@@ -70,18 +84,15 @@ class UsersServiceTest{
                 remark = "nezumi"
             )
             //when
-            usersService.postUserService(tempArg)
+            service.postUserService(tempArg)
 
             //then
-            assertEquals(true,spyUsersRepository.save_isCalled)
-            assertEquals("tanaka",spyUsersRepository.save_argument.name)
-            assertEquals("tanachu",spyUsersRepository.save_argument.nickName)
-            assertEquals(12,spyUsersRepository.save_argument.term)
-            assertEquals("nezumi",spyUsersRepository.save_argument.remark)
-
+            verify { repository.save(match {
+                it.name == "tanaka" &&
+                it.nickName == "tanachu" &&
+                it.term == 12 &&
+                it.remark == "nezumi"
+            })}
         }
-
-
     }
-
 }

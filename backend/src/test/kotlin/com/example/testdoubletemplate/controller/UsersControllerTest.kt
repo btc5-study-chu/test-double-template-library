@@ -1,36 +1,33 @@
 package com.example.testdoubletemplate.controller
 
 import com.example.testdoubletemplate.model.Users
-import com.example.testdoubletemplate.service.SpyUsersService
-import com.example.testdoubletemplate.service.StubUsersService
 import com.example.testdoubletemplate.service.UsersService
+import io.mockk.called
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
-import org.mockito.InjectMocks
+import org.junit.jupiter.api.Test
 import org.mockito.Mock
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import java.util.UUID
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import java.util.*
 
 @SpringBootTest
-@AutoConfigureMockMvc
+//@AutoConfigureMockMvc
 class UsersControllerTest{
 
 //    @InjectMocks
     private lateinit var controller: UsersController
 
-    @Autowired
+//    @Autowired
     private lateinit var mockMvc: MockMvc
 
     @Mock
@@ -47,40 +44,41 @@ class UsersControllerTest{
     @Nested
     inner class `getメソッドのテスト` {
         @Test
-        fun `api_v1_usersにGetメソッドでアクセスするとstatus200OKが返ってくる` (){
+        fun `api_v1_usersにGetメソッドでアクセスするとstatus200OKが返ってくる` () {
             //given
+            every { service.getUsersService() } returns emptyList()
 
             //when
-    //        mockMvc.get("/api/v1/users")
-    //            .andExpect{status{isOk()}}
-            mockMvc = MockMvcBuilders.standaloneSetup(UsersController(spyUsersService)).build()
             mockMvc.perform(
                 get("/api/v1/users")
             )
             //then
                 .andExpect(status().isOk)
         }
+
         @Test
         fun サービス層のgetUsersメソッドを呼んでいること(){
-            mockMvc = MockMvcBuilders.standaloneSetup(UsersController(spyUsersService)).build()
+            every { service.getUsersService() } returns emptyList()
+
             mockMvc.perform(
                 get("/api/v1/users")
             )
-            assertEquals(true,spyUsersService.getUsersService_isCalled)
+
+            verify { service.getUsersService() to called }
         }
 
         @Test
         fun Getメソッドの返り値が正しい型のListであること(){
             //given
-            mockMvc = MockMvcBuilders.standaloneSetup(UsersController(stubUsersService)).build()
-            var dummyId = UUID.fromString("00000000-0000-0000-0000-000000000001")
-            stubUsersService.getUsersService_result = listOf(Users(
-                id = dummyId,
-                name = "tanaka",
-                nickName = "tanachu",
-                term = 12,
-                remark = "nezumi"
-            )
+            val dummyId = UUID.fromString("00000000-0000-0000-0000-000000000001")
+            every { service.getUsersService() } returns listOf(
+                Users(
+                    id = dummyId,
+                    name = "tanaka",
+                    nickName = "tanachu",
+                    term = 12,
+                    remark = "nezumi"
+                )
             )
 
             //when
@@ -95,13 +93,12 @@ class UsersControllerTest{
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].remark").value("nezumi"))
         }
     }
-
+//
     @Nested
     inner class `Postメソッド` {
         @Test
         fun `should return statusOK(statusCode 200) when POST to api_v1_users `() {
-            mockMvc = MockMvcBuilders.standaloneSetup(UsersController(spyUsersService)).build()
-
+            every { service.postUserService(any()) } returns Unit
 
             mockMvc.perform(
                 post("/api/v1/users")
@@ -124,7 +121,7 @@ class UsersControllerTest{
         @Test
         fun `should call postUserService with correct argument when POST to api_v1_users `() {
             //given
-            mockMvc = MockMvcBuilders.standaloneSetup(UsersController(spyUsersService)).build()
+            every { service.postUserService(any()) } returns Unit
 
             //when
             mockMvc.perform(
@@ -142,13 +139,14 @@ class UsersControllerTest{
                     )
             )
 
-            //then
-            assertEquals(true,spyUsersService.postUsersService_isCalled)
-            assertEquals("tanaka", spyUsersService.postUsersServiceArgument.name)
-            assertEquals("tanachu", spyUsersService.postUsersServiceArgument.nickName)
-            assertEquals(12, spyUsersService.postUsersServiceArgument.term)
-            assertEquals("nezumi", spyUsersService.postUsersServiceArgument.remark)
-
+            verify { service.postUserService(
+                Users(
+                    id = null,
+                    name = "tanaka",
+                    nickName = "tanachu",
+                    term = 12,
+                    remark = "nezumi"
+                ))}
         }
     }
 }
